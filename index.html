@@ -4,15 +4,31 @@
 <body>
   <div class="container">
 
-    <video id="local" autoplay muted></video>
-    <video id="remote" autoplay></video>
-    <br>
-    Man in the middle
-    <br>
-    <video id="middle" autoplay></video>
+    <div class="container" style="display: flex;">
+      <div>
+        <br>
+        Local
+        <br>
+        <video id="local" autoplay muted></video>
+      </div>
+
+      <div>
+        <br>
+        Man in the middle
+        <br>
+        <video id="middle" autoplay></video>
+      </div>
+
+      <div>
+        <br>
+        Remote
+        <br>
+        <video id="remote" autoplay></video>
+      </div>
 
 
-    <div class="">
+    </div>
+    <div>
       <button type="button" name="start" onclick="start()">Start</button>
       <button type="button" name="call" onclick="call()">Call</button>
       <button type="button" name="call" onclick="hangup()">Close</button>
