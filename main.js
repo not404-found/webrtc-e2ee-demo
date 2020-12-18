@@ -32,9 +32,6 @@ if (!!window.Worker) {
 if (!((supportsInsertableStreams || supportsInsertableStreamsLegacy) && supportsTransferableStreams)) {
   banner.innerText = 'Your browser does not support Insertable Streams. ' +
     'This sample will not work.';
-  // if (adapter.browserDetails.browser === 'chrome') {
-  //   banner.innerText += ' Try with Enable experimental Web Platform features enabled from chrome://flags.';
-  // }
 }
 
 function gotLocalStream(stream) {
@@ -53,7 +50,7 @@ function start() {
   console.log('Requesting local stream');
   const options = {
     audio: true,
-    video: true
+    video: { width: 480, height: 360 }
   };
   navigator.mediaDevices
     .getUserMedia(options)
@@ -64,45 +61,16 @@ function start() {
     });
 }
 
-function setupSenderTransform(sender) {
-  let senderStreams;
-
-
-  senderStreams = sender.createEncodedStreams();
-
-  const readableStream = senderStreams.readable || senderStreams.readableStream;
-  const writableStream = senderStreams.writable || senderStreams.writableStream;
-
-  const transformStream = new TransformStream({
-    transform: encodeFunction,
-  });
-  readableStream
-    .pipeThrough(transformStream)
-    .pipeTo(writableStream);
-}
-
-function setupReceiverTransform(receiver) {
-  let receiverStreams;
-  receiverStreams = receiver.createEncodedStreams();
-
-  const readableStream = receiverStreams.readable || receiverStreams.readableStream;
-  const writableStream = receiverStreams.writable || receiverStreams.writableStream;
-
-  const transformStream = new TransformStream({
-    transform: decodeFunction,
-  });
-  readableStream
-    .pipeThrough(transformStream)
-    .pipeTo(writableStream);
-}
-
 function call() {
   console.log('Starting call');
 
   startToMiddle = new VideoPipe(localStream, true, false, e => {
     middleVideoTag.srcObject = e.streams[0];
   });
-  startToMiddle.pc1.getSenders().forEach(setupSenderTransform);
+  startToMiddle.pc1.getSenders().forEach(s => {
+    console.log(s);
+    setupSenderTransform(s)
+  });
   startToMiddle.negotiate();
 
   startToEnd = new VideoPipe(localStream, true, true, e => {
@@ -127,6 +95,23 @@ function toggleMute(event) {
   videoMonitor.muted = !muteMiddleBox.checked;
 }
 
+
+function setupSenderTransform(sender) {
+  let senderStreams;
+
+  senderStreams = sender.createEncodedStreams();
+
+  const readableStream = senderStreams.readable || senderStreams.readableStream;
+  const writableStream = senderStreams.writable || senderStreams.writableStream;
+
+  const transformStream = new TransformStream({
+    transform: encodeFunction,
+  });
+
+  readableStream
+    .pipeThrough(transformStream)
+    .pipeTo(writableStream);
+}
 
 function encodeFunction(encodedFrame, controller) {
 
@@ -155,6 +140,21 @@ function encodeFunction(encodedFrame, controller) {
   controller.enqueue(encodedFrame);
 }
 
+
+function setupReceiverTransform(receiver) {
+  let receiverStreams;
+  receiverStreams = receiver.createEncodedStreams();
+
+  const readableStream = receiverStreams.readable || receiverStreams.readableStream;
+  const writableStream = receiverStreams.writable || receiverStreams.writableStream;
+
+  const transformStream = new TransformStream({
+    transform: decodeFunction,
+  });
+  readableStream
+    .pipeThrough(transformStream)
+    .pipeTo(writableStream);
+}
 
 function decodeFunction(encodedFrame, controller) {
 
