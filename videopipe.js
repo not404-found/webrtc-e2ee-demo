@@ -1,13 +1,6 @@
 'use strict';
 const configuration = {
   iceServers: [
-
-    {
-      urls: "turn:34.251.200.213:3478",
-      username: "kurento",
-      credential: "kurento"
-    },
-
     {
       urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"]
     }
@@ -33,6 +26,7 @@ function VideoPipe(stream, forceSend, forceReceive, handler) {
   });
 
   stream.getTracks().forEach((track) => this.pc1.addTrack(track, stream));
+
   this.pc2.ontrack = handler;
   if (preferredVideoCodecMimeType) {
     const {
@@ -66,8 +60,8 @@ VideoPipe.prototype.negotiate = async function() {
     type: 'offer',
     sdp: offer.sdp.replace('red/90000', 'green/90000')
   });
-  await this.pc1.setLocalDescription(offer);
 
+  await this.pc1.setLocalDescription(offer);
   const answer = await this.pc2.createAnswer();
   await this.pc1.setRemoteDescription(answer);
   await this.pc2.setLocalDescription(answer);
